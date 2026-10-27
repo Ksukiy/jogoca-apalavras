@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Palavra do Dia - Jogo Casual</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        .tile {
+            transition: transform 0.15s ease-in-out, background-color 0.3s ease;
+        }
+        .tile-pop {
+            transform: scale(1.08);
+        }
+    </style>
+</head>
+<body class="bg-slate-900 text-slate-100 min-h-screen flex flex-col justify-between items-center p-4 font-sans select-none">
+
+    <!-- Header -->
+    <header class="w-full max-w-md flex justify-between items-center border-b border-slate-800 pb-3">
+        <div>
+            <span id="theme-tag" class="text-xs font-black tracking-widest text-amber-400 uppercase">Tema: Tecnologia</span>
+            <h1 class="text-xl font-extrabold tracking-tight">PALAVRA DO DIA</h1>
+        </div>
+        <div class="flex items-center gap-2 bg-amber-400/10 border border-amber-400/30 px-3 py-1.5 rounded-full">
+            <span class="text-amber-400">🔥</span>
+            <span id="streak-count" class="text-sm font-bold text-amber-300">0</span>
+        </div>
+    </header>
+
+    <!-- Main Game Board -->
+    <main class="my-auto flex flex-col items-center justify-center w-full max-w-md">
+        <div id="board" class="grid grid-rows-6 gap-2 my-4">
+            <!-- Dynamic Board Generated via JS -->
+        </div>
+        <div id="message-box" class="h-6 text-sm font-bold text-amber-400 text-center"></div>
+    </main>
+
+    <!-- Virtual Keyboard -->
+    <footer class="w-full max-w-md flex flex-col gap-1.5 pb-2">
+        <div id="keyboard-row-1" class="flex justify-center gap-1"></div>
+        <div id="keyboard-row-2" class="flex justify-center gap-1"></div>
+        <div id="keyboard-row-3" class="flex justify-center gap-1"></div>
+    </footer>
+
+    <!-- Stats / Game Over Modal -->
+    <div id="modal" class="fixed inset-0 bg-slate-950/80 backdrop-blur-sm flex items-center justify-center p-4 hidden">
+        <div class="bg-slate-800 border-2 border-amber-400/40 rounded-2xl p-6 max-w-xs w-full text-center flex flex-col gap-4 shadow-2xl">
+            <h2 id="modal-title" class="text-2xl font-black text-amber-400">FIM DE JOGO</h2>
+            <p id="modal-desc" class="text-sm text-slate-300"></p>
+            
+            <div class="grid grid-cols-2 gap-2 bg-slate-900/60 p-3 rounded-xl">
+                <div>
+                    <div id="stat-played" class="text-xl font-extrabold">0</div>
+                    <div class="text-xs text-slate-400">Partidas</div>
+                </div>
+                <div>
+                    <div id="stat-winrate" class="text-xl font-extrabold">0%</div>
+                    <div class="text-xs text-slate-400">Vitórias</div>
+                </div>
+            </div>
+
+            <button id="share-btn" onclick="shareResult()" class="w-full py-3 bg-amber-400 hover:bg-amber-300 text-slate-950 font-black rounded-xl transition shadow-lg">
+                COMPARTILHAR RESULTADO 🚀
+            </button>
+        </div>
+    </div>
+
+    <script>
+        const WORD_DATABASE = [
+            { word: "PIXEL", category: "Tecnologia" },
+            { word: "AMIGO", category: "Social" },
+            { word: "LIVRO", category: "Escola" },
+            { word: "FESTA", category: "Hobbies" }
+        ];
+
+        // Pick word based on current date
+        const todayIndex = new Date().getDate() % WORD_DATABASE.length;
+        const TARGET_WORD = WORD_DATABASE[todayIndex].word;
+        const CATEGORY = WORD_DATABASE[todayIndex].category;
+        const MAX_ATTEMPTS = 6;
+        const WORD_LENGTH = TARGET_WORD.length;
+
+        let currentAttempt = "";
+        let attemptsHistory = [];
+        let gameOver = false;
+
+        document.getElementById('theme-tag').textContent = `Tema: ${CATEGORY}`;
+
+        // Local Storage
+        let stats = JSON.parse(localStorage.getItem('word_game_stats')) || {
+            streak: 0,
+            played: 0,
+            wins: 0
+        };
+        document.getElementById('streak-count').textContent = stats.streak;
+
+        // Render Board
+        const board = document.getElementById('board');
+        function initBoard() {
+            board.innerHTML = "";
+            for (let r = 0; r < MAX_ATTEMPTS; r++) {
+                const row = document.createElement('div');
+                row.className = "flex gap-2";
+                row.id = `row-${r}`;
+                for (let c = 0; c < WORD_LENGTH; c++) {
+                    const box = document.createElement('div');
+                    box.className = "tile w-12 h-12 border-2 border-slate-700 rounded-lg flex items-center justify-center font-black text-xl text-white bg-slate-800/50 uppercase";
+                    box.id = `tile-${r}-${c}`;
+                    row.appendChild(box);
+                }
+                board.appendChild(row);
+            }
+        }
+
+        // Render Virtual Keyboard
+        const keyboardKeys = [
+            ["Q", "W", "E", "R", "T", "Y", "U", "I", "O", "P"],
+            ["A", "S", "D", "F", "G", "H", "J", "K", "L"],
+            ["ENTER", "Z", "X", "C", "V", "B", "N", "M", "⌫"]
+        ];
+
+        function initKeyboard() {
+            keyboardKeys.forEach((rowKeys, idx) => {
+                const rowEl = document.getElementById(`keyboard-row-${idx + 1}`);
+                rowKeys.forEach(key => {
+                    const btn = document.createElement('button');
+                    btn.textContent = key;
+                    btn.id = `key-${key}`;
+                    btn.className = `px-2.5 py-3 rounded-lg font-extrabold text-xs bg-slate-700 hover:bg-slate-600 transition text-white ${key.length > 1 ? 'px-3 text-[10px] bg-amber-500 hover:bg-amber-400 text-slate-950' : ''}`;
+                    btn.onclick = () => handleKeyPress(key);
+                    rowEl.appendChild(btn);
+                });
+            });
+        }
+
+        function handleKeyPress(key) {
+            if (gameOver) return;
+
+            if (key === 'ENTER') {
+                submitAttempt();
+            } else if (key === '⌫' || key === 'BACKSPACE') {
+                currentAttempt = currentAttempt.slice(0, -1);
+                updateCurrentRow();
+            } else if (/^[A-Z]$/i.test(key) && currentAttempt.length < WORD_LENGTH) {
+                currentAttempt += key.toUpperCase();
+                updateCurrentRow();
+            }
+        }
+
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter') handleKeyPress('ENTER');
+            else if (e.key === 'Backspace') handleKeyPress('⌫');
+            else handleKeyPress(e.key.toUpperCase());
+        });
+
+        function updateCurrentRow() {
+            const rowIndex = attemptsHistory.length;
+            for (let c = 0; c < WORD_LENGTH; c++) {
+                const tile = document.getElementById(`tile-${rowIndex}-${c}`);
+                tile.textContent = currentAttempt[c] || "";
+                tile.className = currentAttempt[c] 
+                    ? "tile w-12 h-12 border-2 border-amber-400 rounded-lg flex items-center justify-center font-black text-xl text-amber-300 bg-slate-800 uppercase tile-pop"
+                    : "tile w-12 h-12 border-2 border-slate-700 rounded-lg flex items-center justify-center font-black text-xl text-white bg-slate-800/50 uppercase";
+            }
+        }
+
+        function submitAttempt() {
+            if (currentAttempt.length < WORD_LENGTH) {
+                showMessage("Palavra muito curta!");
+                return;
+            }
+
+            const rowIndex = attemptsHistory.length;
+            const guess = currentAttempt;
+            attemptsHistory.push(guess);
+
+            // Validate status
+            for (let i = 0; i < WORD_LENGTH; i++) {
+                const tile = document.getElementById(`tile-${rowIndex}-${i}`);
+                const letter = guess[i];
+                const keyBtn = document.getElementById(`key-${letter}`);
+
+                if (letter === TARGET_WORD[i]) {
+                    tile.className = "tile w-12 h-12 bg-emerald-500 text-white font-black text-xl rounded-lg flex items-center justify-center uppercase";
+                    if (keyBtn) keyBtn.className = "px-2.5 py-3 rounded-lg font-extrabold text-xs bg-emerald-500 text-white";
+                } else if (TARGET_WORD.includes(letter)) {
+                    tile.className = "tile w-12 h-12 bg-amber-500 text-white font-black text-xl rounded-lg flex items-center justify-center uppercase";
+                    if (keyBtn && !keyBtn.className.includes('bg-emerald-500')) {
+                        keyBtn.className = "px-2.5 py-3 rounded-lg font-extrabold text-xs bg-amber-500 text-white";
+                    }
+                } else {
+                    tile.className = "tile w-12 h-12 bg-slate-700 text-slate-400 font-black text-xl rounded-lg flex items-center justify-center uppercase";
+                    if (keyBtn) keyBtn.className = "px-2.5 py-3 rounded-lg font-extrabold text-xs bg-slate-800 text-slate-500";
+                }
+            }
+
+            if (guess === TARGET_WORD) {
+                gameOver = true;
+                stats.played++;
+                stats.wins++;
+                stats.streak++;
+                saveStats();
+                setTimeout(() => showModal(true), 600);
+            } else if (attemptsHistory.length >= MAX_ATTEMPTS) {
+                gameOver = true;
+                stats.played++;
+                stats.streak = 0;
+                saveStats();
+                setTimeout(() => showModal(false), 600);
+            }
+
+            currentAttempt = "";
+        }
+
+        function showMessage(msg) {
+            const box = document.getElementById('message-box');
+            box.textContent = msg;
+            setTimeout(() => { box.textContent = ""; }, 2000);
+        }
+
+        function saveStats() {
+            localStorage.setItem('word_game_stats', JSON.stringify(stats));
+            document.getElementById('streak-count').textContent = stats.streak;
+        }
+
+        function showModal(isWin) {
+            document.getElementById('modal').classList.remove('hidden');
+            document.getElementById('modal-title').textContent = isWin ? "PARABÉNS! 🎉" : "QUE PENA! 💔";
+            document.getElementById('modal-desc').textContent = isWin 
+                ? `Você descobriu a palavra "${TARGET_WORD}" em ${attemptsHistory.length} tentativa(s)!`
+                : `A palavra correta era "${TARGET_WORD}". Tente novamente amanhã!`;
+            
+            document.getElementById('stat-played').textContent = stats.played;
+            document.getElementById('stat-winrate').textContent = `${Math.round((stats.wins / stats.played) * 100)}%`;
+        }
+
+        function shareResult() {
+            const text = `Joguei a Palavra do Dia de Hoje (${CATEGORY}) em ${attemptsHistory.length}/6 tentativas! 🔥 Sequência: ${stats.streak}`;
+            navigator.clipboard.writeText(text);
+            alert("Resultado copiado para a área de transferência!");
+        }
+
+        // Initialize App
+        initBoard();
+        initKeyboard();
+    </script>
+</body>
+</html>

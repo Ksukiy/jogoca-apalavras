@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Protótipos de Interface - Jogo de Palavras</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        .letter-box {
+            width: 3rem;
+            height: 3rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 1.25rem;
+            border-radius: 0.5rem;
+            text-transform: uppercase;
+        }
+    </style>
+</head>
+<body class="bg-slate-900 text-slate-100 min-h-screen flex flex-col font-sans">
+    
+    <!-- Panel Header -->
+    <header class="bg-slate-800 border-b border-slate-700 p-4 sticky top-0 z-50">
+        <div class="max-w-4xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4">
+            <div>
+                <h1 class="text-xl font-bold text-amber-400">Painel de Protótipos UI</h1>
+                <p class="text-xs text-slate-400">Avaliação do Painel de Especialistas (UX, Acessibilidade, Design Visual)</p>
+            </div>
+            <div class="flex gap-2">
+                <button onclick="selectPrototype(1)" id="btn-proto-1" class="px-3 py-1.5 rounded-lg text-sm font-medium transition bg-amber-500 text-slate-950 font-semibold">1. Playful Vibrant</button>
+                <button onclick="selectPrototype(2)" id="btn-proto-2" class="px-3 py-1.5 rounded-lg text-sm font-medium transition bg-slate-700 hover:bg-slate-600">2. High Contrast</button>
+                <button onclick="selectPrototype(3)" id="btn-proto-3" class="px-3 py-1.5 rounded-lg text-sm font-medium transition bg-slate-700 hover:bg-slate-600">3. Minimalist Modern</button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Prototype Display Area -->
+    <main class="flex-grow flex items-center justify-center p-4">
+        
+        <!-- PROTOTYPE 1: Playful Vibrant (Chosen Design) -->
+        <div id="proto-1" class="w-full max-w-sm bg-slate-800 rounded-3xl border-4 border-amber-400/20 p-4 shadow-2xl flex flex-col gap-4">
+            <div class="flex justify-between items-center border-b border-slate-700 pb-2">
+                <div>
+                    <span class="text-xs font-bold uppercase tracking-wider text-amber-400">Tema do Dia</span>
+                    <h2 class="text-lg font-extrabold">🚀 TECNOLOGIA</h2>
+                </div>
+                <div class="bg-amber-400/10 border border-amber-400/30 px-3 py-1 rounded-full text-xs font-bold text-amber-300">
+                    🔥 5 Dias
+                </div>
+            </div>
+
+            <!-- Game Board -->
+            <div class="grid grid-rows-4 gap-2 my-2 justify-center">
+                <!-- Row 1: Guessed -->
+                <div class="flex gap-2">
+                    <div class="letter-box bg-emerald-500 text-white shadow-md">P</div>
+                    <div class="letter-box bg-amber-500 text-white shadow-md">I</div>
+                    <div class="letter-box bg-slate-700 text-slate-400">X</div>
+                    <div class="letter-box bg-slate-700 text-slate-400">E</div>
+                    <div class="letter-box bg-slate-700 text-slate-400">L</div>
+                </div>
+                <!-- Row 2: Guessed -->
+                <div class="flex gap-2">
+                    <div class="letter-box bg-emerald-500 text-white shadow-md">P</div>
+                    <div class="letter-box bg-emerald-500 text-white shadow-md">R</div>
+                    <div class="letter-box bg-emerald-500 text-white shadow-md">O</div>
+                    <div class="letter-box bg-amber-500 text-white shadow-md">T</div>
+                    <div class="letter-box bg-slate-700 text-slate-400">O</div>
+                </div>
+                <!-- Row 3: Current Empty -->
+                <div class="flex gap-2">
+                    <div class="letter-box border-2 border-amber-400 text-amber-400"></div>
+                    <div class="letter-box border-2 border-slate-600"></div>
+                    <div class="letter-box border-2 border-slate-600"></div>
+                    <div class="letter-box border-2 border-slate-600"></div>
+                    <div class="letter-box border-2 border-slate-600"></div>
+                </div>
+                <!-- Row 4: Empty -->
+                <div class="flex gap-2">
+                    <div class="letter-box border-2 border-slate-700"></div>
+                    <div class="letter-box border-2 border-slate-700"></div>
+                    <div class="letter-box border-2 border-slate-700"></div>
+                    <div class="letter-box border-2 border-slate-700"></div>
+                    <div class="letter-box border-2 border-slate-700"></div>
+                </div>
+            </div>
+
+            <!-- Keyboard Sample -->
+            <div class="flex flex-col gap-1 mt-auto">
+                <div class="flex justify-center gap-1">
+                    <span class="px-2 py-3 bg-slate-700 rounded font-bold text-xs">Q</span>
+                    <span class="px-2 py-3 bg-slate-700 rounded font-bold text-xs">W</span>
+                    <span class="px-2 py-3 bg-emerald-600 text-white rounded font-bold text-xs">E</span>
+                    <span class="px-2 py-3 bg-emerald-600 text-white rounded font-bold text-xs">R</span>
+                    <span class="px-2 py-3 bg-amber-500 text-white rounded font-bold text-xs">T</span>
+                </div>
+                <button class="mt-2 w-full py-3 bg-amber-400 hover:bg-amber-300 text-slate-950 font-black rounded-xl shadow-lg transition uppercase">Enviar Palavra</button>
+            </div>
+            <p class="text-xs text-center text-slate-400">Proposta 1: Visual dinâmico, chamativo para o público jovem com alto engajamento visual.</p>
+        </div>
+
+        <!-- PROTOTYPE 2: High Contrast / Accessibility First -->
+        <div id="proto-2" class="hidden w-full max-w-sm bg-black rounded-xl border-4 border-white p-4 flex flex-col gap-4 text-white">
+            <div class="border-b-2 border-white pb-2 flex justify-between items-center">
+                <h2 class="text-xl font-bold">TEMA: TECNOLOGIA</h2>
+                <span class="bg-white text-black px-2 py-1 font-black text-xs">STREAK: 5</span>
+            </div>
+
+            <div class="flex flex-col gap-2 my-2 items-center">
+                <div class="flex gap-2">
+                    <div class="letter-box bg-blue-600 text-white border-2 border-white">P [✓]</div>
+                    <div class="letter-box bg-yellow-400 text-black border-2 border-white">I [~]</div>
+                    <div class="letter-box bg-zinc-800 text-white border-2 border-zinc-600">X [x]</div>
+                </div>
+            </div>
+
+            <p class="text-xs text-slate-300">Proposta 2: Foco total em acessibilidade, alto contraste e indicadores textuais extras para daltonismo.</p>
+        </div>
+
+        <!-- PROTOTYPE 3: Minimalist Modern -->
+        <div id="proto-3" class="hidden w-full max-w-sm bg-slate-950 rounded-2xl border border-slate-800 p-4 flex flex-col gap-4">
+            <div class="text-center">
+                <span class="text-xs text-slate-500 uppercase tracking-widest">Tecnologia</span>
+                <h2 class="text-md font-light text-slate-300">Desafio do Dia</h2>
+            </div>
+
+            <div class="flex justify-center gap-2 my-4">
+                <div class="letter-box border border-slate-700 text-slate-200">A</div>
+                <div class="letter-box border border-slate-700 text-slate-200">U</div>
+                <div class="letter-box border border-slate-700 text-slate-200">R</div>
+                <div class="letter-box border border-slate-700 text-slate-200">A</div>
+            </div>
+
+            <p class="text-xs text-center text-slate-500">Proposta 3: Design sóbrio, limpo e minimalista.</p>
+        </div>
+
+    </main>
+
+    <script>
+        function selectPrototype(num) {
+            [1, 2, 3].forEach(i => {
+                document.getElementById(`proto-${i}`).classList.add('hidden');
+                document.getElementById(`btn-proto-${i}`).className = "px-3 py-1.5 rounded-lg text-sm font-medium transition bg-slate-700 hover:bg-slate-600 text-slate-200";
+            });
+            document.getElementById(`proto-${num}`).classList.remove('hidden');
+            document.getElementById(`btn-proto-${num}`).className = "px-3 py-1.5 rounded-lg text-sm font-medium transition bg-amber-500 text-slate-950 font-bold";
+        }
+    </script>
+</body>
+</html>
